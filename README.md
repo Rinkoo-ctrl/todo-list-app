@@ -17,4 +17,4 @@ A simple React application to manage tasks with add, edit, delete, and toggle fu
 ## How to Run
 1. Clone the repository:  
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/Rinkoo-ctrl/todo-list-app.git
