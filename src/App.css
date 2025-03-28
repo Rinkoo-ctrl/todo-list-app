@@ -95,3 +95,17 @@ button:hover {
 .todo-list li button:last-child:hover {
   background-color: #c82333;
 }
+
+/* Existing CSS me yeh already hona chahiye, bas check kar */
+.button-group {
+  display: flex;
+  gap: 10px;
+}
+
+.todo-list li button:nth-child(2) { /* Edit button */
+  background-color: #ffc107;
+}
+
+.todo-list li button:nth-child(2):hover {
+  background-color: #e0a800;
+}

@@ -1,67 +1,99 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-// use state: jab change ho to render kr le
-//use effect: render hone k baad kya krna h vo ye btata (data fetch krna, local storage m data save krna)
-
 function App() {
   const [task, setTask] = useState(''); // Input ke liye state
   const [todos, setTodos] = useState(() => {
-    // localStorage se todos load karo, agar nahi hain toh empty array
     const savedTodos = localStorage.getItem('todos');
     return savedTodos ? JSON.parse(savedTodos) : [];
   });
+  const [editId, setEditId] = useState(null); // Editing ke liye task ka ID track karne ke liye
+  const [editText, setEditText] = useState(''); // Edit input ka text
 
-  // localStorage me todos save karne ke liye useEffect
+  // localStorage me todos save karne ke liye
   useEffect(() => {
     localStorage.setItem('todos', JSON.stringify(todos));
-  }, [todos]); // Har baar todos update hone pe chalega
+  }, [todos]);
 
-  // Function 1: Task Add Karna
+  // Task Add Karna
   const addTask = () => {
     if (task.trim() === '') return;
-    setTodos([...todos, { text: task, completed: false }]);
+    setTodos([...todos, { id: Date.now(), text: task, completed: false }]); // Unique ID ke liye Date.now()
     setTask('');
   };
 
-  // Function 2: Task Delete Karna
-  const deleteTask = (index) => {
-    const newTodos = todos.filter((_, i) => i !== index);
+  // Task Delete Karna
+  const deleteTask = (id) => {
+    const newTodos = todos.filter((todo) => todo.id !== id);
     setTodos(newTodos);
   };
 
-  // Function 3: Task Toggle Karna
-  const toggleTask = (index) => {
-    const newTodos = todos.map((todo, i) =>
-      i === index ? { ...todo, completed: !todo.completed } : todo
+  // Task Toggle Karna
+  const toggleTask = (id) => {
+    const newTodos = todos.map((todo) =>
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo
     );
     setTodos(newTodos);
+  };
+
+  // Task Edit Karna
+  const editTask = (id, text) => {
+    setEditId(id); // Editing mode on karo aur ID set karo
+    setEditText(text); // Edit input me task ka text daal do
+  };
+
+  // Save Edited Task
+  const saveEdit = () => {
+    if (editText.trim() === '') return;
+    const newTodos = todos.map((todo) =>
+      todo.id === editId ? { ...todo, text: editText } : todo
+    );
+    setTodos(newTodos);
+    setEditId(null); // Editing mode off
+    setEditText(''); // Input clear
   };
 
   return (
     <div className="App">
       <h1>Todo List</h1>
       <div className="input-container">
-        <input
-          type="text"
-          value={task}
-          onChange={(e) => setTask(e.target.value)}
-          placeholder="Add a new task"
-        />
-        <button onClick={addTask}>Add Task</button>
+        {editId === null ? (
+          <>
+            <input
+              type="text"
+              value={task}
+              onChange={(e) => setTask(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && addTask()}
+              placeholder="Add a new task"
+            />
+            <button onClick={addTask}>Add Task</button>
+          </>
+        ) : (
+          <>
+            <input
+              type="text"
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
+              placeholder="Edit your task"
+            />
+            <button onClick={saveEdit}>Save</button>
+          </>
+        )}
       </div>
       <ul className="todo-list">
-        {todos.map((todo, index) => (
+        {todos.map((todo) => (
           <li
-            key={index}
+            key={todo.id}
             className={todo.completed ? 'completed' : ''}
           >
             {todo.text}
             <div className="button-group">
-              <button onClick={() => toggleTask(index)}>
+              <button onClick={() => toggleTask(todo.id)}>
                 {todo.completed ? 'Undo' : 'Complete'}
               </button>
-              <button onClick={() => deleteTask(index)}>Delete</button>
+              <button onClick={() => editTask(todo.id, todo.text)}>Edit</button>
+              <button onClick={() => deleteTask(todo.id)}>Delete</button>
             </div>
           </li>
         ))}
